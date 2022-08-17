@@ -18,10 +18,10 @@ fn test() {
                 match number {
                     0 => (),
                     _ => {
-                        let number = (number - 1) as usize;
-                        assert!((base..base + 15).contains(&number));
-                        assert!(!generated[number - base]);
-                        generated[number - base] = true;
+                        let index = number as usize - 1;
+                        assert!((base..base + 15).contains(&index));
+                        assert!(!generated[index - base]);
+                        generated[index - base] = true;
                     },
                 }
             }

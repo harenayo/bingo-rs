@@ -3,8 +3,8 @@ mod card;
 
 pub use crate::{
     caller::{
+        ArrayCaller,
         Caller,
-        SimpleCaller,
     },
     card::Card,
 };

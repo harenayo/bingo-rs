@@ -1,4 +1,5 @@
-use std::ops::Deref;
+#[cfg(feature = "rand")]
+mod rand;
 
 /// A bingo caller.
 pub trait Caller {
@@ -10,30 +11,30 @@ pub trait Caller {
     fn history(&self) -> &[u8];
 }
 
-/// The simplest caller.
 #[derive(Clone, Copy, Debug)]
-pub struct SimpleCaller<N> {
+/// A caller using an array.
+pub struct ArrayCaller<const N: usize> {
     /// Numbers stored in the order they will be called.
-    numbers: N,
+    numbers: [u8; N],
     /// An index of the next called number.
     next: usize,
 }
 
-impl<N> SimpleCaller<N> {
-    /// Creates a new caller.
-    pub const fn new(numbers: N) -> Self {
+impl<const N: usize> ArrayCaller<N> {
+    pub const fn new(numbers: [u8; N]) -> Self {
         Self { numbers, next: 0 }
     }
 }
 
-impl<N: Deref<Target = [u8]>> Caller for SimpleCaller<N> {
+impl<const N: usize> Caller for ArrayCaller<N> {
     fn call(&mut self) -> Option<u8> {
-        if self.next == self.numbers.len() {
-            Option::None
-        } else {
-            let result = self.numbers[self.next];
-            self.next += 1;
-            Option::Some(result)
+        match self.next == N {
+            true => Option::None,
+            false => {
+                let result = self.numbers[self.next];
+                self.next += 1;
+                Option::Some(result)
+            },
         }
     }
 
