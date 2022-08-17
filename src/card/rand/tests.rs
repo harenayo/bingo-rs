@@ -10,18 +10,21 @@ fn test() {
     let mut rng = thread_rng();
 
     for _ in 0..0xFF {
-        for (column, numbers) in rng.gen::<Card>().numbers.chunks_exact(5).enumerate() {
-            let base = 15 * column;
+        let card: Card = rng.gen();
+
+        for (column, numbers) in card.numbers.chunks_exact(5).enumerate() {
             let mut generated = [false; 15];
 
-            for &number in numbers {
+            for (row, &number) in numbers.iter().enumerate() {
+                let mask = 1 << (5 * column + row);
+
                 match number {
-                    0 => (),
+                    0 => assert_eq!(card.marked & mask, mask),
                     _ => {
-                        let index = number as usize - 1;
-                        assert!((base..base + 15).contains(&index));
-                        assert!(!generated[index - base]);
-                        generated[index - base] = true;
+                        let index = number as usize - 15 * column - 1;
+                        assert_eq!(card.marked & mask, 0);
+                        assert!(!generated[index]);
+                        generated[index] = true;
                     },
                 }
             }
