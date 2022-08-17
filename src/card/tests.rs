@@ -53,6 +53,6 @@ fn test() {
     ];
 
     for (marked, ready, complete) in CASES {
-        assert_eq!(Card::new([0; 25], marked).info(), (ready, complete));
+        assert!(Card::new([0; 25], marked).info() == (ready, complete));
     }
 }

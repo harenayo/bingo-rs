@@ -19,10 +19,14 @@ fn test() {
                 let mask = 1 << (5 * column + row);
 
                 match number {
-                    0 => assert_eq!(card.marked & mask, mask),
+                    0 => {
+                        assert!(column == 2);
+                        assert!(row == 2);
+                        assert!(card.marked & mask == mask);
+                    },
                     _ => {
                         let index = number as usize - 15 * column - 1;
-                        assert_eq!(card.marked & mask, 0);
+                        assert!(card.marked & mask == 0);
                         assert!(!generated[index]);
                         generated[index] = true;
                     },
