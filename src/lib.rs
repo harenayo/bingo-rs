@@ -1,3 +1,5 @@
+//! A bingo library.
+
 mod caller;
 mod card;
 
