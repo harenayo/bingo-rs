@@ -1,7 +1,6 @@
 /// A bingo card.
 ///
-/// Cards hold numbers as an array.
-/// Each square has its index:
+/// Each square has an index:
 ///
 /// |  b  |  i  |  n  |  g  |  o  |
 /// | :-: | :-: | :-: | :-: | :-: |
@@ -10,60 +9,25 @@
 /// |  2  |  7  |  12 |  17 |  22 |
 /// |  3  |  8  |  13 |  18 |  23 |
 /// |  4  |  9  |  14 |  19 |  24 |
-///
-/// In addition, they also have three states:
-///
-/// | name | description |
-/// | :-: | - |
-/// | `marked` | Marked squares |
-/// | `ready` | Squares in a row or a column which have four marked squares |
-/// | `complete` | Squares in a row or a column which have five marked squares |
-///
-/// These are bit fields, where the nth bit represents the information of the nth square.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Card {
     numbers: [u8; 25],
     marked: u32,
-    ready: u32,
-    complete: u32,
 }
 
 impl Card {
     /// Creates a new card.
     pub const fn new(numbers: [u8; 25], marked: u32) -> Self {
-        let (ready, complete) = Self::calculate(marked);
-
-        Self {
-            numbers,
-            marked,
-            ready,
-            complete,
-        }
+        Self { numbers, marked }
     }
 
-    /// Creates a new card.
-    ///
-    /// # Safety
-    ///
-    /// `ready` and `complete` must not conflict with `marked`.
-    pub const unsafe fn of(numbers: [u8; 25], marked: u32, ready: u32, complete: u32) -> Self {
-        Self {
-            numbers,
-            marked,
-            ready,
-            complete,
-        }
-    }
-
-    /// Marks squares with the number.
+    /// Marks squares having the number.
     pub fn mark(&mut self, number: u8) {
         for (index, &space) in self.numbers.iter().enumerate() {
             if space == number {
                 self.marked |= 1 << index;
             }
         }
-
-        (self.ready, self.complete) = Self::calculate(self.marked);
     }
 
     /// Returns an array of the numbers.
@@ -71,13 +35,18 @@ impl Card {
         &self.numbers
     }
 
-    /// Returns the states in the order `marked`, `ready`, `complete`.
-    pub const fn states(&self) -> (u32, u32, u32) {
-        (self.marked, self.ready, self.complete)
+    /// Returns bit flags indicating whether the squares are marked.
+    pub const fn marked(&self) -> u32 {
+        self.marked
     }
 
-    /// Calculates `ready` and `complete` from `marked`.
-    const fn calculate(marked: u32) -> (u32, u32) {
+    /// Returns two sets of bit flags: `ready` and `complete`.
+    ///
+    /// | name | description |
+    /// | :-: | - |
+    /// | `ready` | Squares in a row or a column which have four marked squares |
+    /// | `complete` | Squares in a row or a column which have five marked squares |
+    pub fn info(&self) -> (u32, u32) {
         #[allow(clippy::unusual_byte_groupings)]
         const LINES: [u32; 12] = [
             0b00000_00000_00000_00000_11111,
@@ -96,18 +65,13 @@ impl Card {
 
         let mut ready = 0;
         let mut complete = 0;
-        let mut index = 0;
 
-        while index < 12 {
-            let line = LINES[index];
-
-            match (marked & line).count_ones() {
+        for line in LINES {
+            match (self.marked & line).count_ones() {
                 4 => ready |= line,
                 5 => complete |= line,
                 _ => (),
             }
-
-            index += 1;
         }
 
         (ready, complete)
@@ -118,7 +82,7 @@ impl Card {
 mod tests {
     use super::*;
 
-    /// Tests if `ready` and `complete` calculations are correct.
+    /// Tests whether `ready` and `complete` are calculated correctly.
     #[test]
     fn test() {
         #[allow(clippy::unusual_byte_groupings)]
@@ -171,7 +135,7 @@ mod tests {
         ];
 
         for (marked, ready, complete) in CASES {
-            assert_eq!(Card::calculate(marked), (ready, complete));
+            assert_eq!(Card::new([0; 25], marked).info(), (ready, complete));
         }
     }
 }
