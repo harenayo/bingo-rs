@@ -18,7 +18,7 @@ impl Distribution<Card> for Standard {
 
         for (column, numbers) in numbers.chunks_exact_mut(5).enumerate() {
             numbers.copy_from_slice(
-                array::<_, 5, _>(|index| (15 * column + index + 1) as u8)
+                array::<_, 15, _>(|index| (15 * column + index + 1) as u8)
                     .partial_shuffle(rng, 5)
                     .0,
             );
