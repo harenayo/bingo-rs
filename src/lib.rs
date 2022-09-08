@@ -1,17 +1,7 @@
 //! A crate for bingo.
 
 #[cfg(feature = "rand")]
-use {
-    rand::{
-        distributions::{
-            Distribution,
-            Standard,
-        },
-        seq::SliceRandom as _,
-        Rng,
-    },
-    std::array::from_fn as array,
-};
+mod rand;
 
 /// A card.
 ///
@@ -24,6 +14,7 @@ use {
 /// |  2  |  7  |  12 |  17 |  22 |
 /// |  3  |  8  |  13 |  18 |  23 |
 /// |  4  |  9  |  14 |  19 |  24 |
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Card {
     numbers: [u8; 25],
     marked: u32,
@@ -92,32 +83,53 @@ impl Card {
     }
 }
 
-#[cfg(feature = "rand")]
-impl Distribution<Card> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Card {
-        let mut numbers = [0; 25];
-
-        for (column, numbers) in numbers.chunks_exact_mut(5).enumerate() {
-            numbers.copy_from_slice(
-                array::<_, 15, _>(|index| (15 * column + index + 1) as u8)
-                    .partial_shuffle(rng, 5)
-                    .0,
-            );
-        }
-
-        numbers[12] = 0;
-
-        Card {
-            numbers,
-            marked: 1 << 12,
-        }
-    }
+/// A caller.
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub struct Caller<const N: usize> {
+    numbers: [u8; N],
+    next: usize,
 }
 
-/// Creates a caller at random; in other words, returns a shuffled array containing all integers between `1` and `75`.
-#[cfg(feature = "rand")]
-pub fn caller<R: Rng + ?Sized>(rng: &mut R) -> [u8; 75] {
-    let mut numbers = array(|index| index as u8 + 1);
-    numbers.shuffle(rng);
-    numbers
+impl<const N: usize> Caller<N> {
+    /// Creates a new caller.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `N` is [`usize::MAX`] or `next` is greater than `N`.
+    pub const fn new(numbers: [u8; N], next: usize) -> Self {
+        if N == usize::MAX {
+            panic!("`N` must not be `usize::MAX`")
+        } else if next > N {
+            panic!("`next` must be `N` or less")
+        } else {
+            Self { numbers, next }
+        }
+    }
+
+    /// Returns the numbers.
+    pub const fn numbers(&self) -> &[u8; N] {
+        &self.numbers
+    }
+
+    /// Returns an index of the next number.
+    pub const fn next(&self) -> usize {
+        self.next
+    }
+
+    /// Returns the history.
+    pub fn history(&self) -> &[u8] {
+        &self.numbers[0..self.next]
+    }
+
+    /// Calls a number.
+    pub fn call(&mut self) -> Option<u8> {
+        match self.next == N {
+            true => Option::None,
+            false => {
+                let number = self.numbers[self.next];
+                self.next += 1;
+                Option::Some(number)
+            },
+        }
+    }
 }

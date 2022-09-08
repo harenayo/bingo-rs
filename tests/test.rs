@@ -1,5 +1,5 @@
 use bingo::{
-    caller,
+    Caller,
     Card,
 };
 use rand::{
@@ -97,15 +97,16 @@ fn test2() {
     }
 }
 
-/// Tests [`caller`].
+/// Tests generation of callers.
 #[test]
 fn test3() {
     let mut rng = thread_rng();
 
     for _ in 0..0xFF {
+        let mut caller: Caller<75> = rng.gen();
         let mut generated = [false; 75];
 
-        for number in caller(&mut rng) {
+        while let Option::Some(number) = caller.call() {
             let index = number as usize - 1;
             assert!(!generated[index]);
             generated[index] = true;
