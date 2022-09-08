@@ -1,5 +1,7 @@
 //! A crate for bingo.
 
+#![no_std]
+
 #[cfg(feature = "rand")]
 mod rand;
 

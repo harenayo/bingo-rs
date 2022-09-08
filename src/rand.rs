@@ -2,6 +2,7 @@ use crate::{
     Caller,
     Card,
 };
+use core::array::from_fn as array;
 use rand::{
     distributions::{
         Distribution,
@@ -10,7 +11,6 @@ use rand::{
     seq::SliceRandom as _,
     Rng,
 };
-use std::array::from_fn as array;
 
 impl Distribution<Card> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Card {
