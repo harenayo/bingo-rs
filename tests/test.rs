@@ -1,12 +1,14 @@
 use bingo::{
     caller,
-    card,
-    info,
+    Card,
 };
-use rand::thread_rng;
+use rand::{
+    thread_rng,
+    Rng as _,
+};
 use std::convert::identity;
 
-/// Tests [`info`].
+/// Tests [`Card::info`].
 #[test]
 fn test1() {
     #[allow(clippy::unusual_byte_groupings)]
@@ -59,19 +61,19 @@ fn test1() {
     ];
 
     for (marked, ready, complete) in CASES {
-        assert!(info(marked) == (ready, complete));
+        assert!(Card::new([0; 25], marked).info() == (ready, complete));
     }
 }
 
-/// Tests [`card`].
+/// Tests generation of cards.
 #[test]
 fn test2() {
     let mut rng = thread_rng();
 
     for _ in 0..0xFF {
-        let (numbers, marked) = card(&mut rng);
+        let card: Card = rng.gen();
 
-        for (column, numbers) in numbers.chunks_exact(5).enumerate() {
+        for (column, numbers) in card.numbers().chunks_exact(5).enumerate() {
             let mut generated = [false; 15];
 
             for (row, &number) in numbers.iter().enumerate() {
@@ -81,11 +83,11 @@ fn test2() {
                     0 => {
                         assert!(column == 2);
                         assert!(row == 2);
-                        assert!(marked & mask == mask);
+                        assert!(card.marked() & mask == mask);
                     },
                     _ => {
                         let index = number as usize - 15 * column - 1;
-                        assert!(marked & mask == 0);
+                        assert!(card.marked() & mask == 0);
                         assert!(!generated[index]);
                         generated[index] = true;
                     },
