@@ -1,12 +1,14 @@
-use bingo::{
-    Caller,
-    Card,
+use {
+    bingo::{
+        Caller,
+        Card,
+    },
+    rand::{
+        thread_rng,
+        Rng as _,
+    },
+    std::convert::identity,
 };
-use rand::{
-    thread_rng,
-    Rng as _,
-};
-use std::convert::identity;
 
 /// Tests [`Card::info`].
 #[test]

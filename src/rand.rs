@@ -1,15 +1,17 @@
-use crate::{
-    Caller,
-    Card,
-};
-use core::array::from_fn as array;
-use rand::{
-    distributions::{
-        Distribution,
-        Standard,
+use {
+    crate::{
+        Caller,
+        Card,
     },
-    seq::SliceRandom as _,
-    Rng,
+    core::array::from_fn as array,
+    rand::{
+        distributions::{
+            Distribution,
+            Standard,
+        },
+        seq::SliceRandom as _,
+        Rng,
+    },
 };
 
 impl Distribution<Card> for Standard {

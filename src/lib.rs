@@ -25,7 +25,10 @@ pub struct Card {
 impl Card {
     /// Creates a new card.
     pub const fn new(numbers: [u8; 25], marked: u32) -> Self {
-        Self { numbers, marked }
+        Self {
+            numbers,
+            marked,
+        }
     }
 
     /// Returns the numbers.
@@ -104,7 +107,10 @@ impl<const N: usize> Caller<N> {
         } else if next > N {
             panic!("`next` must be `N` or less")
         } else {
-            Self { numbers, next }
+            Self {
+                numbers,
+                next,
+            }
         }
     }
 
